@@ -18,7 +18,7 @@ COPY --from=build /app/bin/server /app/bin/
 
 # Set a healthcheck command
 HEALTHCHECK --interval=5s --timeout=3s \
-  CMD curl -f http://localhost:8089/ || exit 1
+  CMD curl -f http://localhost:80/ || exit 1
 # Start server.
-EXPOSE 8089
+EXPOSE 80
 CMD ["/app/bin/server"]

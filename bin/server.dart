@@ -44,7 +44,7 @@ void main(List<String> args) async {
   });
 
   app.post('/send-message', triggerWebSocketMessage); // Map the endpoint to trigger WebSocket messages
-  var server = await io.serve(app, '0.0.0.0', 8089);
+  var server = await io.serve(app, '0.0.0.0', 80);
   print("Server is on at ${server.address.host} ${server.port}");
 }
 
