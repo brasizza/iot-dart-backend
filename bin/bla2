@@ -1,0 +1,55 @@
+import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as io;
+import 'package:shelf_router/shelf_router.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'bla.dart';
+
+void main(List<String> args) async {
+  var app = Router();
+
+  final Map<String, WebSocketSink> webSockets = {};
+
+  app.get('/', (Request r) {
+    return Response.ok('hello-world');
+  });
+
+  app.get("/ws", webSocketHandler);
+
+  app.get('/send-message', triggerWebSocketMessage); // Map the endpoint to trigger WebSocket messages
+
+  var server = await io.serve(app, '0.0.0.0', 8089);
+  print("Server is on at ${server.address.host} ${server.port}");
+}
+
+void webSocketHandler(WebSocketChannel channel) {
+  // Add the channel to the map when a new WebSocket connection is established
+  webSockets[channel.hashCode.toString()] = channel.sink;
+
+  channel.stream.listen((message) {
+    // Process the incoming WebSocket message here
+    // You can emit events and perform other actions
+
+    // Send a response back
+    channel.sink.add('Received: $message');
+  });
+
+  // Remove the channel from the map when the WebSocket connection is closed
+  channel.sink.done.then((_) {
+    webSockets.remove(channel.hashCode.toString());
+  });
+}
+
+Response triggerWebSocketMessage(Request request) {
+  // Get the WebSocket channel's ID from the request parameters or headers
+  final channelId = request.headers['channel-id'];
+
+  // Get the WebSocket sink associated with the channel ID
+  final sink = webSockets[channelId];
+
+  // Send a message through the WebSocket
+  sink?.add('Hello, WebSocket!');
+
+  // Return a response
+  return Response.ok('WebSocket message sent');
+}
