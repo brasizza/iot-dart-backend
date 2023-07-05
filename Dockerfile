@@ -16,6 +16,9 @@ FROM scratch
 COPY --from=build /runtime/ /
 COPY --from=build /app/bin/server /app/bin/
 
+# Set a healthcheck command
+HEALTHCHECK --interval=5s --timeout=3s \
+  CMD curl -f http://localhost/ || exit 1
 # Start server.
 EXPOSE 8089
 CMD ["/app/bin/server"]
